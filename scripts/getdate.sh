@@ -37,9 +37,9 @@ linkserver(){
 	echo -e "\033[32m感谢以下作者的无私奉献！！！\033[0m"
 	echo 当前使用后端为：$server_link
 	echo 1 api.dler.io			（墙洞提供）
-	echo 2 sub.shellclash.cf	（作者提供）
-	echo 3 sub.xeton.dev		（SUB作者T大提供）
-	echo 4 sub.id9.cc			（品云提供）
+	echo 2 api.v1.mk			（肥羊提供,支持vless）
+	echo 3 sub.xeton.dev		（SUB作者提供）
+	echo 4 v.id9.cc				（品云提供,支持vless）
 	echo 5 sub.maoxiongnet.com	（猫熊提供）
 	echo -----------------------------------------------
 	echo 0 返回上级菜单
@@ -194,7 +194,7 @@ getlink2(){
 	read -p "请输入完整链接 > " link
 	test=$(echo $link | grep -iE "tp.*://" )
 	link=`echo ${link/\ \(*\)/''}`   #删除恶心的超链接内容
-	link=`echo ${link//\&/\%26}`   #将分隔符 & 替换成urlcode：%26
+	link=`echo ${link//\&/\\\&}`   #处理分隔符
 	if [ -n "$link" -a -n "$test" ];then
 		echo -----------------------------------------------
 		echo -e 请检查输入的链接是否正确：
@@ -256,10 +256,16 @@ clashlink(){
 	  
 	elif [ "$num" = 2 ];then
 		echo -----------------------------------------------
-		echo -e "\033[33m此功能可能会导致严重bug，仅限熟练了解clash运行机制的用户使用！！！\033[0m"
-		echo -e "如你不熟悉clash机制或者使用此功能出现bug，请使用\033[32m在线生成配置文件功能！\033[0m"
+		echo -e "\033[33m此功能可能会导致严重bug！！！\033[0m"
+		sleep 1
 		echo -----------------------------------------------
-		read -p "是否继续？[1/0] > " res
+		echo -e "强烈建议你使用\033[32m在线生成配置文件功能！\033[0m"
+		sleep 1
+		echo -----------------------------------------------
+		echo -e "\033[33m继续后如出现任何问题，请务必自行解决，一切提问恕不受理！\033[0m"
+		echo -----------------------------------------------
+		sleep 2
+		read -p "我确认遇到问题可以自行解决[1/0] > " res
 		if [ "$res" = '1' ]; then
 			getlink2
 		else
@@ -348,7 +354,7 @@ gettar(){
 		fi
 	fi
 	#修饰文件及版本号
-	shtype=sh && [ -n "$(ls -l /bin/sh|grep -oE 'dash|show|bash')" ] && shtype=bash 
+	shtype=sh && command -v bash &>/dev/null && shtype=bash 
 	sed -i "s|/bin/sh|/bin/$shtype|" $clashdir/start.sh
 	chmod +x $clashdir/start.sh
 	setconfig versionsh_l $release_new
@@ -364,13 +370,20 @@ gettar(){
 		echo "alias clash=\"$shtype $clashdir/clash.sh\"" >> $profile #设置快捷命令环境变量
 		sed -i '/export clashdir=*/'d $profile
 		echo "export clashdir=\"$clashdir\"" >> $profile #设置clash路径环境变量
+		#适配zsh环境变量
+		[ -n "$(ls -l /bin/sh|grep -oE 'zsh')" ] && { 
+			echo "alias clash=\"$shtype $clashdir/clash.sh\"" >> ~/.zshrc
+			echo "export clashdir=\"$clashdir\"" >> ~/.zshrc
+		}
 	else
 		echo 无法写入环境变量！请检查安装权限！
 		exit 1
 	fi
-	#华硕/Padavan额外设置
+	#梅林/Padavan额外设置
 	[ -n "$initdir" ] && {
-		sed -i '/ShellClash初始化/'d $initdir && touch $initdir && echo "$clashdir/start.sh init #ShellClash初始化脚本" >> $initdir
+		sed -i '/ShellClash初始化/'d $initdir
+		touch $initdir
+		echo "$clashdir/start.sh init #ShellClash初始化脚本" >> $initdir
 		setconfig initdir $initdir
 		}
 	#小米镜像化OpenWrt额外设置
@@ -390,6 +403,7 @@ gettar(){
 	rm -rf /tmp/clashfm.tar.gz 
 	rm -rf $clashdir/clash.service
 }
+
 getsh(){
 	echo -----------------------------------------------
 	echo -e "当前脚本版本为：\033[33m $versionsh_l \033[0m"
@@ -473,21 +487,21 @@ setcore(){
 	###
 	echo -----------------------------------------------
 	[ -z "$cpucore" ] && getcpucore
-	echo -e "当前clash核心：\033[47;30m $clashcore \033[46;30m$clashv\033[0m"
+	echo -e "当前clash核心：\033[42;30m $clashcore \033[47;30m$clashv\033[0m"
 	echo -e "当前系统处理器架构：\033[32m $cpucore \033[0m"
 	echo -e "\033[33m请选择需要使用的核心版本！\033[0m"
 	echo -----------------------------------------------
-	echo "1 clash：     稳定，内存占用小，推荐！"
-	echo "(官方正式版)  不支持Tun模式、混合模式"
+	echo -e "1 \033[43;30m  Clash  \033[0m：	\033[32m占用低\033[0m"
+	echo -e " (官方基础版)  \033[33m不支持Tun、Rule-set等\033[0m"
+	echo -e "  说明文档：	\033[36;4mhttps://lancellc.gitbook.io\033[0m"
 	echo
-	echo "2 clashpre：  支持Tun模式、混合模式"
-	echo "(高级预览版)  内存占用更高"
+	echo -e "2 \033[43;30m Clashpre \033[0m：	\033[32m支持Tun、Rule-set、域名嗅探\033[0m"
+	echo -e " (官方高级版)  \033[33m不支持vless、hy协议\033[0m"
+	echo -e "  说明文档：	\033[36;4mhttps://lancellc.gitbook.io\033[0m"
 	echo
-	echo "3 clash.net： 支持部分vless协议"
-	echo "(.net定制版)  第三方定制内核"
-	echo
-	echo "4 clash.meta：支持大部分vless协议"
-	echo "(meta定制版)  第三方定制内核"
+	echo -e "3 \033[43;30mClash.Meta\033[0m：	\033[32m多功能，支持最全面\033[0m"
+	echo -e " (Meta定制版)  \033[33m第三方定制内核\033[0m"
+	echo -e "  说明文档：	\033[36;4mhttps://docs.metacubex.one\033[0m"
 	echo
 	echo "5 手动指定处理器架构"
 	echo -----------------------------------------------
@@ -506,10 +520,6 @@ setcore(){
 			version=$clashpre_v
 			getcore
 		elif [ "$num" = 3 ]; then
-			clashcore=clash.net
-			version=$clashnet_v
-			getcore
-		elif [ "$num" = 4 ]; then
 			clashcore=clash.meta
 			version=$meta_v
 			getcore
@@ -759,13 +769,12 @@ setserver(){
 	echo -e "\033[30;47m切换ShellClash版本及更新源地址\033[0m"
 	echo -e "当前源地址：\033[4;32m$update_url\033[0m"
 	echo -----------------------------------------------
-	echo -e " 1 \033[32m正式版\033[0m&Jsdelivr-CDN源"
-	echo -e " 2 \033[32m正式版\033[0m&fastgit.org源"
-	echo -e " 3 \033[36m公测版\033[0m&Github源(本机clash服务加速)"
-	echo -e " 4 \033[36m公测版\033[0m&ShellClash源"
-	echo -e " 5 \033[36m公测版\033[0m&githubusercontents加速"
-	echo -e " 6 \033[36m公测版\033[0m&fastgit.org源"
-	echo -e " 7 \033[33m内测版\033[0m(请加TG讨论组:\033[4;36mhttps://t.me/ShellClash\033[0m)"
+	echo -e " 1 \033[33m稳定版\033[0m&Jsdelivr-CDN源"
+	echo -e " 2 \033[33m稳定版\033[0m&Github源(须clash服务启用)"
+	echo -e " 3 \033[32m公测版\033[0m&Github源(须clash服务启用)"
+	echo -e " 4 \033[32m公测版\033[0m&ShellClash私人源"
+	echo -e " 5 \033[32m公测版\033[0m&Jsdelivr-CDN源(推荐)"
+	echo -e " 7 \033[31m内测版\033[0m(请加TG讨论组:\033[4;36mhttps://t.me/ShellClash\033[0m)"
 	echo -e " 8 自定义源地址(用于本地源或自建源)"
 	echo -e " 9 \033[31m版本回退\033[0m"
 	echo -e " 0 返回上级菜单"
@@ -776,7 +785,7 @@ setserver(){
 		release_url='https://fastly.jsdelivr.net/gh/juewuy/ShellClash'
 		saveserver
 	elif [ "$num" = 2 ]; then
-		release_url='https://raw.fastgit.org/juewuy/ShellClash'
+		release_url='https://raw.githubusercontent.com/juewuy/ShellClash'
 		saveserver
 	elif [ "$num" = 3 ]; then
 		update_url='https://raw.githubusercontent.com/juewuy/ShellClash/master'
@@ -787,11 +796,11 @@ setserver(){
 		release_url=''
 		saveserver
 	elif [ "$num" = 5 ]; then
-		update_url='https://raw.githubusercontents.com/juewuy/ShellClash/master'
+		update_url='https://fastly.jsdelivr.net/gh/juewuy/ShellClash@master'
 		release_url=''
 		saveserver
 	elif [ "$num" = 6 ]; then
-		update_url='https://raw.fastgit.org/juewuy/ShellClash/master'
+		update_url='https://raw.staticdn.net/juewuy/ShellClash/master'
 		release_url=''
 		saveserver
 	elif [ "$num" = 7 ]; then
@@ -810,7 +819,8 @@ setserver(){
 		fi
 	elif [ "$num" = 9 ]; then
 		echo -----------------------------------------------
-		$clashdir/start.sh webget /tmp/clashrelease https://raw.githubusercontents.com/juewuy/ShellClash/master/bin/release_version echooff rediroff 2>/tmp/clashrelease
+		echo -e "\033[33m如无法连接，请务必先启用clash服务！！！\033[0m"
+		$clashdir/start.sh webget /tmp/clashrelease https://raw.githubusercontent.com/juewuy/ShellClash/master/bin/release_version echooff rediroff 2>/tmp/clashrelease
 		echo -e "\033[31m请选择想要回退至的release版本：\033[0m"
 		cat /tmp/clashrelease | awk '{print " "NR" "$1}'
 		echo -e " 0 返回上级菜单"
@@ -819,13 +829,14 @@ setserver(){
 			setserver
 		elif [ $num -le $(cat /tmp/clashrelease | awk 'END{print NR}') 2>/dev/null ]; then
 			release_version=$(cat /tmp/clashrelease | awk '{print $1}' | sed -n "$num"p)
-			update_url="https://raw.githubusercontents.com/juewuy/ShellClash/$release_version"
+			update_url="https://raw.githubusercontent.com/juewuy/ShellClash/$release_version"
 			saveserver
 			release_url=''
 		else
 			echo -----------------------------------------------
 			echo -e "\033[31m输入有误，请重新输入！\033[0m"
 		fi
+		rm -rf /tmp/clashrelease
 	else
 		errornum
 	fi
@@ -928,33 +939,7 @@ update(){
 }
 #新手引导
 userguide(){
-	whichmod(){	
-		echo -----------------------------------------------
-		echo -e "\033[33m是否需要代理UDP流量(主要用于连接外服游戏)？ \033[0m"
-		echo -----------------------------------------------
-		echo -e " 1 \033[33m不代理UDP流量(推荐)\033[0m"
-		ip tuntap >/dev/null 2>&1 && [ "$?" = 0 ] && \
-		echo -e " 2 \033[32m使用Tun虚拟网卡\033[0m代理UDP流量" || \
-		echo -e " - \033[0m使用Tun模式(你的设备不支持此模式，如为虚拟机运行请调整虚拟网卡设置)\033[0m"
-		[ -n "$(iptables -j TPROXY 2>&1 | grep 'on-port')" ] && \
-		echo -e " 3 \033[32m使用Tproxy模式\033[0m代理UDP流量"
-		echo -----------------------------------------------
-		read -p "请输入对应数字 > " num
-		if [ -z "$num" ] || [ "$num" -gt 4 ];then
-			errornum
-			whichmod
-		elif [ "$num" = 1 ];then
-			setconfig redir_mod "Redir模式"
-			setconfig clashcore "clash"
-		elif [ "$num" = 2 ];then
-			setconfig redir_mod "混合模式"
-			setconfig clashcore "clashpre"
-		elif [ "$num" = 3 ];then
-			setconfig redir_mod "Redir模式"
-			setconfig clashcore "clash"
-			setconfig tproxy_mod "已开启"
-		fi		
-	}
+
 	forwhat(){
 		echo -----------------------------------------------
 		echo -e "\033[30;46m 欢迎使用ShellClash新手引导！ \033[0m"
@@ -971,7 +956,11 @@ userguide(){
 			errornum
 			forwhat
 		elif [ "$num" = 1 ];then
-			whichmod
+			if command -v nft &>/dev/null;then
+				setconfig redir_mod "Nft模式" 
+			else
+				setconfig redir_mod "Redir模式"
+			fi
 			#检测IP转发
 			if [ "$(cat /proc/sys/net/ipv4/ip_forward)" = "0" ];then
 				echo -----------------------------------------------
@@ -1049,7 +1038,7 @@ userguide(){
 			sethost
 		fi
 	}
-	if type systemd >/dev/null 2>&1 ;then
+	if command -v systemd >/dev/null 2>&1 ;then
 		echo -----------------------------------------------
 		echo -e "\033[32m是否开启公网访问Dashboard面板及socks服务？\033[0m"
 		echo -e "注意当前设备必须有公网IP才能从公网正常访问"
@@ -1072,6 +1061,12 @@ userguide(){
 			setconfig public_support $public_support
 			setconfig authentication \'$authentication\'
 		fi
+	fi
+	#小米设备软固化
+	if [ "$systype" = "mi_snapshot" ];then
+		echo -----------------------------------------------
+		read -p "是否启用软固化SSH？(1/0) > " res
+		[ "$res" = 1 ] && setconfig mi_autoSSH 已启用
 	fi
 	#提示导入订阅或者配置文件
 	echo -----------------------------------------------
@@ -1097,11 +1092,9 @@ testcommand(){
 	echo " 1 查看Clash运行时的报错信息(会停止clash服务)"
 	echo " 2 查看系统DNS端口(:53)占用 "
 	echo " 3 测试ssl加密(aes-128-gcm)跑分"
-	echo " 4 查看iptables端口转发详情"
-	echo " 5 查看config.yaml前40行"
+	echo " 4 查看clash相关路由规则"
+	echo " 5 查看config.yaml前30行"
 	echo " 6 测试代理服务器连通性（google.tw)"
-	echo " 7 重新进入新手引导"
-	echo " 9 查看后台脚本运行日志"
 	echo -----------------------------------------------
 	echo " 0 返回上级目录！"
 	read -p "请输入对应数字 > " num
@@ -1129,22 +1122,35 @@ testcommand(){
 		echo -----------------------------------------------
 		exit;
 	elif [ "$num" = 4 ]; then
-		echo -----------------------------------------------
-		iptables  -t nat  -L PREROUTING --line-numbers
-		echo -----------------------------------------------
-		iptables  -t nat  -L clash --line-numbers
-		echo -----------------------------------------------
-		iptables  -t nat  -L clash_dns --line-numbers
-		echo -----------------------------------------------
-		ip6tables  -t nat  -L PREROUTING --line-numbers
-		echo -----------------------------------------------
-		ip6tables  -t nat  -L clashv6 --line-numbers
-		echo -----------------------------------------------
-		ip6tables  -t nat  -L clashv6_dns --line-numbers
+
+		if [ -n "$(echo $redir_mod | grep 'Nft')" -o "$local_type" = "nftables增强模式" ];then
+			nft list table inet shellclash
+		else
+			echo -------------------Redir---------------------
+			iptables  -t nat  -L PREROUTING --line-numbers
+			iptables  -t nat -L clash_dns --line-numbers
+			iptables  -t nat  -L clash --line-numbers
+			[ -n "$(echo $redir_mod | grep 'Tproxy')" ] && {
+				echo ----------------Tun/Tproxy-------------------
+				iptables  -t mangle -L PREROUTING --line-numbers
+				iptables  -t mangle  -L clash --line-numbers
+			}
+			[ -n "$(echo $redir_mod | grep 'Tproxy')" -a "$ipv6_redir" = "已开启" ] && {
+				echo ----------------Tun/Tproxy-------------------
+				ip6tables  -t mangle -L PREROUTING --line-numbers
+				ip6tables  -t mangle  -L clashv6 --line-numbers
+				[ -n "$(lsmod | grep 'ip6table_nat')" ] && {
+					echo -------------------Redir---------------------
+					ip6tables  -t nat  -L PREROUTING --line-numbers
+					ip6tables  -t nat -L clashv6_dns --line-numbers
+					ip6tables  -t nat  -L clashv6 --line-numbers
+				}
+			}
+		fi
 		exit;
 	elif [ "$num" = 5 ]; then
 		echo -----------------------------------------------
-		sed -n '1,40p' $yaml
+		sed -n '1,30p' $yaml
 		echo -----------------------------------------------
 		exit;
 	elif [ "$num" = 6 ]; then
@@ -1158,12 +1164,7 @@ testcommand(){
 			echo -e "\033[31m连接超时！请重试或检查节点配置！\033[0m"
 		fi
 		clashsh
-	elif [ "$num" = 7 ]; then
-		userguide
-	elif [ "$num" = 9 ]; then
-		echo -----------------------------------------------
-		cat $clashdir/log
-		exit;
+
 	else
 		errornum
 		clashsh

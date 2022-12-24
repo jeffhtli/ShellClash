@@ -32,15 +32,15 @@
 ——————————<br>
 ~更多设备支持，请提issue或前往TG群反馈（需提供设备名称及运行uname -a返回的设备核心信息）<br>
 
+## 常见问题：
+
+[ShellClash常见问题 | Juewuy's Blog](https://juewuy.github.io/chang-jian-wen-ti/)
+
 使用方式：
 --
 ~确认路由器设备已经开启SSH并获取root权限（带GUI桌面的Linux设备可使用自带终端安装）<br>
 ~使用SSH连接工具（如putty，JuiceSSH，系统自带终端等）路由器或Linux设备的SSH管理界面或终端界面，并切换到root用户<br>
-~确认设备已经安装curl或者wget下载工具。**如未安装**，LInux设备请[参考此处](https://www.howtoing.com/install-curl-in-linux)安装curl，基于OpenWrt（小米官方系统、潘多拉、高恪等）的设备请使用如下命令安装curl：<br>
-
-```Shell
-opkg update && opkg install curl #如已安装请忽略
-```
+~确认设备已经安装curl或者wget下载工具
 
 ~之后在SSH界面执行如下安装命令，并按照后续提示完成安装<br>
 
@@ -48,13 +48,17 @@ opkg update && opkg install curl #如已安装请忽略
 
 ~**使用curl安装**：<br>
 
-```Shell
-#fastgit.org加速
-export url='https://raw.fastgit.org/juewuy/ShellClash/master' && sh -c "$(curl -kfsSl $url/install.sh)" && source /etc/profile &> /dev/null
-#GitHub源
+```shell
+#GitHub源(可能需要代理)
 export url='https://raw.githubusercontent.com/juewuy/ShellClash/master' && sh -c "$(curl -kfsSl $url/install.sh)" && source /etc/profile &> /dev/null
+```
+
+```shell
 #jsDelivrCDN源
 export url='https://fastly.jsdelivr.net/gh/juewuy/ShellClash@master' && sh -c "$(curl -kfsSl $url/install.sh)" && source /etc/profile &> /dev/null
+```
+
+```shell
 #作者私人源
 export url='https://shellclash.cf' && sh -c "$(curl -kfsSl $url/install.sh)" && source /etc/profile &> /dev/null
 ```
@@ -62,12 +66,13 @@ export url='https://shellclash.cf' && sh -c "$(curl -kfsSl $url/install.sh)" && 
 ~**使用wget安装**：<br>
 
 ```Shell
-#GitHub源
+#GitHub源(可能需要代理)
 export url='https://raw.githubusercontent.com/juewuy/ShellClash/master' && wget -q --no-check-certificate -O /tmp/install.sh $url/install.sh  && sh /tmp/install.sh && source /etc/profile &> /dev/null
+```
+
+```shell
 #jsDelivrCDN源
 export url='https://fastly.jsdelivr.net/gh/juewuy/ShellClash@master' && wget -q --no-check-certificate -O /tmp/install.sh $url/install.sh  && sh /tmp/install.sh && source /etc/profile &> /dev/null
-#作者私人源
-export url='http://shellclash.cf/' && wget -q -O /tmp/install.sh $url/install.sh  && sh /tmp/install.sh && source /etc/profile &> /dev/null
 ```
 
 ~**使用低版本wget（提示不支持https）安装**：<br>
@@ -100,13 +105,9 @@ clash -t #测试模式运行
 
 > 大部分的设备/系统都已经预装了以下的大部分依赖，使用时如无影响可以无视之
 
-```Text
-bash/ash		必须		全部缺少时无法安装及运行脚本
+```shell
 curl/wget		必须		全部缺少时无法在线安装及更新，无法使用节点保存功能
-iptables		重要		缺少时只能使用纯净模式
-systemd/rc.common	一般		全部缺少时只能使用保守模式
-iptables-mod-nat	一般		缺少时无法使用redir模式，混合模式
-ip6tables-mod-nat	较低		缺少时影响redir模式，混合模式对ipv6的支持
+iptables/nftables	重要		缺少时只能使用纯净模式
 crontab			较低		缺少时无法启用定时任务功能
 net-tools		极低		缺少时无法正常检测端口占用
 ubus/iproute-doc	极低		缺少时无法正常获取本机host地址
@@ -123,11 +124,6 @@ ubus/iproute-doc	极低		缺少时无法正常获取本机host地址
 --
 ### [TG讨论组](https://t.me/ShellClash) 
 
-相关Q&A：
---
-
-### [详见博客](https://juewuy.github.io)
-
 ## 请喝杯茶：
 
 ​		支付宝										微信
@@ -136,5 +132,4 @@ ubus/iproute-doc	极低		缺少时无法正常获取本机host地址
 
 机场推荐：
 --
-#### [梦迪-高速专线，流媒体解锁，月付推荐](https://dash.catnet.uk/#/register?code=KOhfH9qD)<br>
 #### [墙洞-老牌稳定，流媒体解锁，年付推荐](https://dler.best/auth/register?affid=89698)<br>
